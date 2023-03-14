@@ -259,9 +259,7 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
 
 
   // 👉 onMounted
-  onMounted(() => {
-    calendarApi.value = refCalendar.value.getApi()
-  })
+
 
 
   // 👉 Jump to date on sidebar(inline) calendar change
