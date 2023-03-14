@@ -61,9 +61,6 @@ export default {
           end: event.end ? formatDate(new Date(event.end)) : null,
         });
       },
-
-
-
       eventResize: async ({ event }) => {
         await updateCalendar(event.id, {
           start: event.start.toISOString(),
@@ -84,10 +81,6 @@ export default {
       console.log("events", events.value);
     });
 
-    return {
-      calendarOptions,
-      events,
-    };
   },
 };
 </script>

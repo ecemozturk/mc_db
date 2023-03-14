@@ -23,7 +23,7 @@ export const blankEvent = {
     description: '',
   },
 }
-export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpen) => {
+export const useCalendarOld = (event, isEventHandlerSidebarActive, isLeftSidebarOpen) => {
   // 👉 themeConfig
   const { isAppRtl } = useThemeConfig()
 
@@ -258,7 +258,6 @@ export const useCalendar = (event, isEventHandlerSidebarActive, isLeftSidebarOpe
   }
 
 
-  // 👉 onMounted
 
 
 

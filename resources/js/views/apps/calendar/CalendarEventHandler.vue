@@ -2,16 +2,13 @@
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { VForm } from 'vuetify/components'
 import { useCalendarStore } from './useCalendarStore'
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-import avatar6 from '@images/avatars/avatar-6.png'
-import avatar7 from '@images/avatars/avatar-7.png'
 import {
   requiredValidator,
   urlValidator,
 } from '@validators'
+
+import { ref, computed, defineProps, defineEmits, watch, nextTick } from 'vue'
+import useCalendar from '@/composables/useCalendar'
 
 const props = defineProps({
   isDrawerOpen: {
@@ -19,23 +16,33 @@ const props = defineProps({
     required: true,
   },
   event: {
-    type: null,
+    type: Object,
     required: true,
   },
 })
 
+const formatDate = (date) => {
+  const year = date.getFullYear();
+  const month = `0${date.getMonth() + 1}`.slice(-2);
+  const day = `0${date.getDate()}`.slice(-2);
+  const hours = `0${date.getHours()}`.slice(-2);
+  const minutes = `0${date.getMinutes()}`.slice(-2);
+  const seconds = `0${date.getSeconds()}`.slice(-2);
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+
 const emit = defineEmits([
   'update:isDrawerOpen',
-  'addEvent',
+  'createEvent',
   'updateEvent',
   'removeEvent',
+  'updateCalendar',
 ])
-
 const store = useCalendarStore()
 const refForm = ref()
 
 // 👉 Event
-const event = ref(JSON.parse(JSON.stringify(props.event)))
 
 const resetEvent = () => {
   event.value = JSON.parse(JSON.stringify(props.event))
@@ -53,50 +60,16 @@ const removeEvent = () => {
   emit('update:isDrawerOpen', false)
 }
 
-const handleSubmit = () => {
-  refForm.value?.validate().then(({ valid }) => {
-    if (valid) {
-
-      // If id exist on id => Update event
-      if ('id' in event.value)
-        emit('updateEvent', event.value)
-
-      // Else => add new event
-      else
-        emit('addEvent', event.value)
-
-      // Close drawer
-      emit('update:isDrawerOpen', false)
-    }
-  })
+const updateCalendar = async (id, eventData) => {
+  await store.updateEvent(id, eventData)
+  emit('updateEvent', eventData)
 }
 
-const guestsOptions = [
-  {
-    avatar: avatar1,
-    name: 'Jane Foster',
-  },
-  {
-    avatar: avatar3,
-    name: 'Donna Frank',
-  },
-  {
-    avatar: avatar5,
-    name: 'Gabrielle Robertson',
-  },
-  {
-    avatar: avatar7,
-    name: 'Lori Spears',
-  },
-  {
-    avatar: avatar6,
-    name: 'Sandy Vega',
-  },
-  {
-    avatar: avatar2,
-    name: 'Cheryl May',
-  },
-]
+const createEvent = async () => {
+  await storeCalendar(event.value)
+  emit('createEvent', event.value)
+  event.value = { title: '', description:'', start: '', end: '' , id:''}
+}
 
 // 👉 Form
 const onCancel = () => {
@@ -110,34 +83,67 @@ const onCancel = () => {
   })
 }
 
+const dialogModelValueUpdate = val => {
+  emit('update:isDrawerOpen', val)
+}
+
+const { storeCalendar } = useCalendar()
+const event = ref({ title: '', description: '', start: '', end: '', id:'' })
+
+
+const handleSubmit = () => {
+  refForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      console.log('if valid')
+      console.log('if valid', event.value)
+
+      // If id exists on event => Update event
+      if ('id' in event.value) {
+        updateCalendar(event.value.id, {
+          title: event.value.title,
+          description: event.extendedProps.description,
+          start: formatDate(new Date(event.value.start)),
+          end: event.value.end ? formatDate(new Date(event.value.end)) : null,
+        })
+      }
+      // Else => Add new event
+      else {
+        createEvent() // Call createEvent method here
+      }
+
+      // Close drawer
+      emit('update:isDrawerOpen', false)
+    }
+  })
+}
+
 const startDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: true,
-    dateFormat: 'Y-m-d H:i',
+    dateFormat: 'Y-m-d H:i:00',
   }
 
   if (event.value.end)
     config.maxDate = event.value.end
-  
+
   return config
 })
 
 const endDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: true,
-    dateFormat: 'Y-m-d H:i',
+    dateFormat: 'Y-m-d H:i:00',
   }
 
   if (event.value.start)
     config.minDate = event.value.start
-  
+
   return config
 })
 
-const dialogModelValueUpdate = val => {
-  emit('update:isDrawerOpen', val)
-}
 </script>
+
+
 
 <template>
   <VNavigationDrawer
@@ -205,32 +211,6 @@ const dialogModelValueUpdate = val => {
               </VCol>
 
               <!-- 👉 Calendar -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="event.extendedProps.calendar"
-                  label="Label"
-                  :rules="[requiredValidator]"
-                  :items="store.availableCalendars"
-                  :item-title="item => item.label"
-                  :item-value="item => item.label"
-                >
-                  <template #selection="{ item }">
-                    <div
-                      v-show="event.extendedProps.calendar"
-                      class="align-center"
-                      :class="event.extendedProps.calendar ? 'd-flex' : ''"
-                    >
-                      <VBadge
-                        :color="item.raw.color"
-                        inline
-                        dot
-                        class="pa-1"
-                      />
-                      <span>{{ item.raw.label }}</span>
-                    </div>
-                  </template>
-                </VSelect>
-              </VCol>
 
               <!-- 👉 Start date -->
               <VCol cols="12">
@@ -255,49 +235,17 @@ const dialogModelValueUpdate = val => {
               </VCol>
 
               <!-- 👉 All day -->
-              <VCol cols="12">
-                <VSwitch
-                  v-model="event.allDay"
-                  label="All day"
-                />
-              </VCol>
 
               <!-- 👉 Event URL -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="event.url"
-                  label="Event URL"
-                  :rules="[urlValidator]"
-                  type="url"
-                />
-              </VCol>
 
               <!-- 👉 Guests -->
-              <VCol cols="12">
-                <VSelect
-                  v-model="event.extendedProps.guests"
-                  label="Guests"
-                  :items="guestsOptions"
-                  :item-title="item => item.name"
-                  :item-value="item => item.name"
-                  chips
-                  multiple
-                  eager
-                />
-              </VCol>
 
               <!-- 👉 Location -->
-              <VCol cols="12">
-                <VTextField
-                  v-model="event.extendedProps.location"
-                  label="Location"
-                />
-              </VCol>
 
               <!-- 👉 Description -->
               <VCol cols="12">
                 <VTextarea
-                  v-model="event.extendedProps.description"
+                  v-model="event.description"
                   label="Description"
                 />
               </VCol>

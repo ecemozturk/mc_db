@@ -1,19 +1,18 @@
 <script setup>
 import '@fullcalendar/core/vdom'
-
-// Local imports
 import FullCalendar from '@fullcalendar/vue3'
 import {
   blankEvent,
-  useCalendar,
+  useCalendarOld
 } from '@/views/apps/calendar/useCalendar'
-import { useCalendarStore } from '@/views/apps/calendar/useCalendarStore'
 import { useResponsiveLeftSidebar } from '@core/composable/useResponsiveSidebar'
-
-// Components
+import useCalendar from "@/composables/useCalendar";
 import CalendarEventHandler from '@/views/apps/calendar/CalendarEventHandler.vue'
-
-const store = useCalendarStore()
+import { watch, watchEffect, ref } from "vue";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import listPlugin from "@fullcalendar/list";
 
 // 👉 Event
 const event = ref(structuredClone(blankEvent))
@@ -24,23 +23,76 @@ watch(isEventHandlerSidebarActive, val => {
     event.value = structuredClone(blankEvent)
 })
 
-const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
-const { refCalendar, calendarOptions, addEvent, updateEvent, removeEvent, jumpToDate } = useCalendar(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
 
-// 👉 Check all
-const checkAll = computed({
-  get: () => store.selectedCalendars.length === store.availableCalendars.length,
-  set: val => {
-    if (val)
-      store.selectedCalendars = store.availableCalendars.map(i => i.label)
-    else if (store.selectedCalendars.length === store.availableCalendars.length)
-      store.selectedCalendars = []
+const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
+const { events, fetchEvents, storeCalendar, updateCalendar, destroyCalendar } = useCalendar();
+const { removeEvent } = useCalendarOld(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
+const calendarOptions = ref({
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
+  initialView: "dayGridMonth",
+  selectable: true,
+  headerToolbar: {
+    start: 'drawerToggler,prev,next title',
+    end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
+  },
+
+  dateClick(info) {
+    event.value = { ...event.value, start: String(new Date(info.date)) }
+    isEventHandlerSidebarActive.value = true
+  },
+  customButtons: {
+    drawerToggler: {
+      text: 'calendarDrawerToggler',
+      click() {
+        isLeftSidebarOpen.value = true
+      },
+    },
+  },
+
+  eventDrop: async ({ event }) => {
+    await destroyCalendar(event.id);
+    events.value = events.value.filter((e) => e.id !== event.id);
+  },
+  eventClick: async ({ event }) => {
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = `0${date.getMonth() + 1}`.slice(-2);
+      const day = `0${date.getDate()}`.slice(-2);
+      const hours = `0${date.getHours()}`.slice(-2);
+      const minutes = `0${date.getMinutes()}`.slice(-2);
+      const seconds = `0${date.getSeconds()}`.slice(-2);
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    };
+
+    await updateCalendar(event.id, {
+      title: event.title,
+      description: event.extendedProps.description,
+      start: formatDate(new Date(event.start)),
+      end: event.end ? formatDate(new Date(event.end)) : null,
+    });
+  },
+  eventResize: async ({ event }) => {
+    await updateCalendar(event.id, {
+      start: event.start.toISOString(),
+      end: event.end?.toISOString(),
+    });
+  },
+  events: async (info, successCallback) => {
+    try {
+      await fetchEvents();
+      successCallback(events.value);
+    } catch (error) {
+      console.error('Error occurred while fetching calendar events', error);
+    }
   },
 })
+
 </script>
 
-<template>
+
+        <template>
   <div>
+
     <VCard>
       <!-- `z-index: 0` Allows overlapping vertical nav on calendar -->
       <VLayout style="z-index: 0;">
@@ -60,11 +112,12 @@ const checkAll = computed({
               prepend-icon="tabler-plus"
               @click="isEventHandlerSidebarActive = true"
             >
-              Add event
+              Yeni Ekle
             </VBtn>
           </div>
 
           <VDivider />
+
 
           <div class="d-flex align-center justify-center pa-2 mb-3">
             <AppDateTimePicker
@@ -87,14 +140,6 @@ const checkAll = computed({
                 v-model="checkAll"
                 label="View all"
               />
-              <VCheckbox
-                v-for="calendar in store.availableCalendars"
-                :key="calendar.label"
-                v-model="store.selectedCalendars"
-                :value="calendar.label"
-                :color="calendar.color"
-                :label="calendar.label"
-              />
             </div>
           </div>
         </VNavigationDrawer>
@@ -102,7 +147,7 @@ const checkAll = computed({
         <VMain>
           <VCard flat>
             <FullCalendar
-              ref="refCalendar"
+              :events="events"
               :options="calendarOptions"
             />
           </VCard>
