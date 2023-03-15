@@ -1,12 +1,7 @@
 <script setup>
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 import { VForm } from 'vuetify/components'
-import { useCalendarStore } from './useCalendarStore'
-import {
-  requiredValidator,
-  urlValidator,
-} from '@validators'
-
+import { requiredValidator } from '@validators'
 import { ref, computed, defineProps, defineEmits, watch, nextTick } from 'vue'
 import useCalendar from '@/composables/useCalendar'
 
@@ -21,6 +16,7 @@ const props = defineProps({
   },
 })
 
+// Format Date
 const formatDate = (date) => {
   const year = date.getFullYear();
   const month = `0${date.getMonth() + 1}`.slice(-2);
@@ -32,100 +28,122 @@ const formatDate = (date) => {
 };
 
 
+// Emits
 const emit = defineEmits([
   'update:isDrawerOpen',
-  'addEvent',
+  'createEvent',
   'updateEvent',
   'removeEvent',
-])
-const store = useCalendarStore()
-const refForm = ref()
+]);
+const updateEvent = async (id, eventData) => {
+  try {
+    const response = await fetch(`/api/events/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(eventData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update event with id ${id}`);
+    }
+
+    const updatedEvent = await response.json();
+    return updatedEvent;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+const refForm = ref();
 
 // 👉 Event
 
 const resetEvent = () => {
-  event.value = JSON.parse(JSON.stringify(props.event))
+  event.value = JSON.parse(JSON.stringify(props.event));
   nextTick(() => {
-    refForm.value?.resetValidation()
-  })
-}
+    refForm.value?.resetValidation();
+  });
+};
 
-watch(() => props.isDrawerOpen, resetEvent)
+watch(() => props.isDrawerOpen, resetEvent);
 
 const removeEvent = () => {
-  emit('removeEvent', event.value.id)
+  emit('removeEvent', event.value.id);
 
   // Close drawer
-  emit('update:isDrawerOpen', false)
-}
-const updateEvent = async (id, eventData) => {
-  await store.updateEvent(id, eventData)
-  const updatedEventData = await store.getEvent(id)
-  emit('updateEvent', updatedEventData)
-}
+  emit('update:isDrawerOpen', false);
+};
 
+const updateEventMethod = async (id, eventData) => {
+  await updateEvent(id, eventData);
+  emit('updateEvent', eventData);
+};
 
 const createEvent = async () => {
-  await storeEvent(event.value)
-  emit('createEvent', event.value)
-  event.value = { title: '', description:'', start: '', end: '' , id: undefined}
-}
+  await storeCalendar(event.value);
+  emit('createEvent', event.value);
+  event.value = { title: '', description:'', start: '', end: '' , id:''};
+};
 
 // 👉 Form
 const onCancel = () => {
 
   // Close drawer
-  emit('update:isDrawerOpen', false)
+  emit('update:isDrawerOpen', false);
   nextTick(() => {
-    refForm.value?.reset()
-    resetEvent()
-    refForm.value?.resetValidation()
-  })
-}
+    refForm.value?.reset();
+    resetEvent();
+    refForm.value?.resetValidation();
+  });
+};
 
 const dialogModelValueUpdate = val => {
-  emit('update:isDrawerOpen', val)
-}
+  emit('update:isDrawerOpen', val);
+};
 
-const { storeEvent } = useCalendar()
-const event = ref({ title: '', description: '', start: '', end: '', id: undefined })
+const { storeCalendar } = useCalendar();
+const event = ref({ title: '', description: '', start: '', end: '', id:'' });
 
 
 const handleSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
-      const updatedEvent = {
-        ...event.value,
-        start: formatDate(new Date(event.value.start)),
-        end: event.value.end ? formatDate(new Date(event.value.end)) : null,
-      }
-
       // If id exists on event => Update event
-      if ('id' in event.value) {
-        updateEvent(updatedEvent)
+      if ('id' in props.event) {
+        console.log('if event id', event.value);
+
+        updateEventMethod(props.event.id, {
+          title: event.value.title,
+          description: event.value.description,
+          start: formatDate(new Date(event.value.start)),
+          end: event.value.end ? formatDate(new Date(event.value.end)) : null,
+        });
       }
       // Else => Add new event
       else {
-        createEvent()
+        createEvent(); // Call createEvent method here
       }
 
       // Close drawer
-      emit('update:isDrawerOpen', false)
+      emit('update:isDrawerOpen', false);
     }
-  })
-}
+  });
+};
 
 const startDateTimePickerConfig = computed(() => {
   const config = {
     enableTime: true,
     dateFormat: 'Y-m-d H:i:00',
-  }
+  };
 
   if (event.value.end)
-    config.maxDate = event.value.end
+    config.maxDate = event.value.end;
 
-  return config
-})
+  return config;
+});
 
 const endDateTimePickerConfig = computed(() => {
   const config = {
@@ -155,11 +173,11 @@ const endDateTimePickerConfig = computed(() => {
     <!-- 👉 Header -->
     <div class="d-flex align-center pa-6 pb-1">
       <h6 class="text-h6">
-        {{ event.id ? 'Güncelle' : 'Ekle' }} Evens
+        {{ event.id ? 'Update' : 'Add' }} Event
       </h6>
 
       <VSpacer />
-<!--Event Delete-->
+
       <VBtn
         v-show="event.id"
         icon
@@ -254,19 +272,19 @@ const endDateTimePickerConfig = computed(() => {
                   type="submit"
                   class="me-3"
                 >
-                  Gönder
+                  Submit
                 </VBtn>
                 <VBtn
                   variant="tonal"
                   color="secondary"
                   @click="onCancel"
                 >
-                  İptal
+                  Cancel
                 </VBtn>
               </VCol>
             </VRow>
           </VForm>
-        <!-- !SECTION -->
+          <!-- !SECTION -->
         </VCardText>
       </VCard>
     </PerfectScrollbar>

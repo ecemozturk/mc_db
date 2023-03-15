@@ -40,10 +40,9 @@ const extractEventDataFromEventApi = eventApi => {
 
 
 const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
-const { events, fetchEvents, updateEvent, destroyCalendar } = useCalendar();
+const { events, fetchEvents, updateEvent, removeEvent } = useCalendar();
 const { refCalendar,  addEvent, jumpToDate} = useCalendarOld(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
 
-const { removeEvent } = useCalendarOld(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
 
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
@@ -53,8 +52,6 @@ const calendarOptions = ref({
     start: 'drawerToggler,prev,next title',
     end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
   },
-
-
 
   eventClick({ event: clickedEvent }) {
     const extractEventDataFromEventApi = (event) => {
@@ -107,13 +104,14 @@ const calendarOptions = ref({
       await updateEvent(eventId, updatedEventData);
       isEventHandlerSidebarActive.value = true;
     } catch (error) {
-      console.error(error);
+      console.error('newError', error);
+
     }
   },
 
   eventDrop: async ({ event }) => {
     try {
-      await destroyCalendar(event.id);
+      await removeEvent(event.id);
       events.value = events.value.filter((e) => e.id !== event.id);
     } catch (error) {
       console.error(error);
@@ -148,7 +146,7 @@ const calendarOptions = ref({
 
 
 
-        <template>
+<template>
   <div>
 
     <VCard>

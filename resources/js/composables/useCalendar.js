@@ -23,7 +23,7 @@ const updateEvent = async (id, event) => {
     return updatedEvent
 }
 
-const destroyCalendar = async (id) => {
+const removeEvent = async (id) => {
     await axios.delete(`/api/events/${id}`)
     events.value = events.value.filter((e) => e.id !== id)
 }
@@ -33,5 +33,5 @@ export default () => ({
     fetchEvents,
     storeCalendar,
     updateEvent,
-    destroyCalendar
+    removeEvent,
 })
