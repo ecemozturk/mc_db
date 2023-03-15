@@ -44,6 +44,7 @@ export default {
         events.value = events.value.filter((e) => e.id !== event.id);
       },
       eventClick: async ({ event }) => {
+        console.log('event clicked')
         const formatDate = (date) => {
           const year = date.getFullYear();
           const month = `0${date.getMonth() + 1}`.slice(-2);
@@ -54,7 +55,7 @@ export default {
           return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
         };
 
-        await updateCalendar(event.id, {
+        await updateEvent(event.id, {
           title: event.title,
           description: event.extendedProps.description,
           start: formatDate(new Date(event.start)),
@@ -62,7 +63,7 @@ export default {
         });
       },
       eventResize: async ({ event }) => {
-        await updateCalendar(event.id, {
+        await updateEvent(event.id, {
           start: event.start.toISOString(),
           end: event.end?.toISOString(),
         });

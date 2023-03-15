@@ -34,10 +34,9 @@ const formatDate = (date) => {
 
 const emit = defineEmits([
   'update:isDrawerOpen',
-  'createEvent',
+  'addEvent',
   'updateEvent',
   'removeEvent',
-  'updateCalendar',
 ])
 const store = useCalendarStore()
 const refForm = ref()
@@ -59,16 +58,17 @@ const removeEvent = () => {
   // Close drawer
   emit('update:isDrawerOpen', false)
 }
-
-const updateCalendar = async (id, eventData) => {
+const updateEvent = async (id, eventData) => {
   await store.updateEvent(id, eventData)
-  emit('updateEvent', eventData)
+  const updatedEventData = await store.getEvent(id)
+  emit('updateEvent', updatedEventData)
 }
 
+
 const createEvent = async () => {
-  await storeCalendar(event.value)
+  await storeEvent(event.value)
   emit('createEvent', event.value)
-  event.value = { title: '', description:'', start: '', end: '' , id:''}
+  event.value = { title: '', description:'', start: '', end: '' , id: undefined}
 }
 
 // 👉 Form
@@ -87,28 +87,26 @@ const dialogModelValueUpdate = val => {
   emit('update:isDrawerOpen', val)
 }
 
-const { storeCalendar } = useCalendar()
-const event = ref({ title: '', description: '', start: '', end: '', id:'' })
+const { storeEvent } = useCalendar()
+const event = ref({ title: '', description: '', start: '', end: '', id: undefined })
 
 
 const handleSubmit = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
-      console.log('if valid')
-      console.log('if valid', event.value)
+      const updatedEvent = {
+        ...event.value,
+        start: formatDate(new Date(event.value.start)),
+        end: event.value.end ? formatDate(new Date(event.value.end)) : null,
+      }
 
       // If id exists on event => Update event
       if ('id' in event.value) {
-        updateCalendar(event.value.id, {
-          title: event.value.title,
-          description: event.extendedProps.description,
-          start: formatDate(new Date(event.value.start)),
-          end: event.value.end ? formatDate(new Date(event.value.end)) : null,
-        })
+        updateEvent(updatedEvent)
       }
       // Else => Add new event
       else {
-        createEvent() // Call createEvent method here
+        createEvent()
       }
 
       // Close drawer
@@ -157,11 +155,11 @@ const endDateTimePickerConfig = computed(() => {
     <!-- 👉 Header -->
     <div class="d-flex align-center pa-6 pb-1">
       <h6 class="text-h6">
-        {{ event.id ? 'Update' : 'Add' }} Event
+        {{ event.id ? 'Güncelle' : 'Ekle' }} Evens
       </h6>
 
       <VSpacer />
-
+<!--Event Delete-->
       <VBtn
         v-show="event.id"
         icon
@@ -256,14 +254,14 @@ const endDateTimePickerConfig = computed(() => {
                   type="submit"
                   class="me-3"
                 >
-                  Submit
+                  Gönder
                 </VBtn>
                 <VBtn
                   variant="tonal"
                   color="secondary"
                   @click="onCancel"
                 >
-                  Cancel
+                  İptal
                 </VBtn>
               </VCol>
             </VRow>

@@ -23,10 +23,28 @@ watch(isEventHandlerSidebarActive, val => {
     event.value = structuredClone(blankEvent)
 })
 
+const extractEventDataFromEventApi = eventApi => {
+  const { id, title, start, end, url, extendedProps: { description } } = eventApi
+
+  return {
+    id,
+    title,
+    start,
+    end,
+    url,
+    extendedProps: {
+      description,
+    },
+  }
+}
+
 
 const { isLeftSidebarOpen } = useResponsiveLeftSidebar()
-const { events, fetchEvents, storeCalendar, updateCalendar, destroyCalendar } = useCalendar();
+const { events, fetchEvents, updateEvent, destroyCalendar } = useCalendar();
+const { refCalendar,  addEvent, jumpToDate} = useCalendarOld(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
+
 const { removeEvent } = useCalendarOld(event, isEventHandlerSidebarActive, isLeftSidebarOpen)
+
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin],
   initialView: "dayGridMonth",
@@ -36,6 +54,25 @@ const calendarOptions = ref({
     end: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
   },
 
+
+
+  eventClick({ event: clickedEvent }) {
+    const extractEventDataFromEventApi = (event) => {
+      return {
+        id: event.id,
+        title: event.title,
+        description: event.extendedProps.description,
+        start: event.start,
+        end: event.end,
+      };
+    };
+
+    // * Only grab required fields otherwise it goes in an infinite loop
+    // ! Always grab all fields rendered by the form (even if they are `undefined`) otherwise due to Vue3/Composition API you might get: "object is not extensible"
+    const eventData = extractEventDataFromEventApi(clickedEvent);
+    event.value = eventData;
+    isEventHandlerSidebarActive.value = true;
+  },
   dateClick(info) {
     event.value = { ...event.value, start: String(new Date(info.date)) }
     isEventHandlerSidebarActive.value = true
@@ -49,11 +86,7 @@ const calendarOptions = ref({
     },
   },
 
-  eventDrop: async ({ event }) => {
-    await destroyCalendar(event.id);
-    events.value = events.value.filter((e) => e.id !== event.id);
-  },
-  eventClick: async ({ event }) => {
+  async updateEvent(eventId, eventData) {
     const formatDate = (date) => {
       const year = date.getFullYear();
       const month = `0${date.getMonth() + 1}`.slice(-2);
@@ -64,30 +97,55 @@ const calendarOptions = ref({
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     };
 
-    await updateCalendar(event.id, {
-      title: event.title,
-      description: event.extendedProps.description,
-      start: formatDate(new Date(event.start)),
-      end: event.end ? formatDate(new Date(event.end)) : null,
-    });
-  },
-  eventResize: async ({ event }) => {
-    await updateCalendar(event.id, {
-      start: event.start.toISOString(),
-      end: event.end?.toISOString(),
-    });
-  },
-  events: async (info, successCallback) => {
     try {
-      await fetchEvents();
-      successCallback(events.value);
+      const updatedEventData = {
+        title: eventData.title,
+        description: eventData.description,
+        start: formatDate(new Date(eventData.start)),
+        end: eventData.end ? formatDate(new Date(eventData.end)) : null,
+      };
+      await updateEvent(eventId, updatedEventData);
+      isEventHandlerSidebarActive.value = true;
     } catch (error) {
-      console.error('Error occurred while fetching calendar events', error);
+      console.error(error);
     }
   },
-})
 
+  eventDrop: async ({ event }) => {
+    try {
+      await destroyCalendar(event.id);
+      events.value = events.value.filter((e) => e.id !== event.id);
+    } catch (error) {
+      console.error(error);
+    }
+  },
+
+  eventResize: async ({ event }) => {
+    try {
+      await updateEvent(event.id, {
+        start: event.start.toISOString(),
+        end: event.end?.toISOString(),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  },
+  events: async (info) => {
+    try {
+      await fetchEvents();
+      return events.value;
+    } catch (error) {
+      console.error('Error occurred while fetching calendar events', error);
+      return [];
+    }
+  },
+});
+
+// 👉 Event Handler
+
+// 👉 Calendar component
 </script>
+
 
 
         <template>

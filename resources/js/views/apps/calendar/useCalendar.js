@@ -46,7 +46,7 @@ export const useCalendarOld = (event, isEventHandlerSidebarActive, isLeftSidebar
 
   // ℹ️ Extract event data from event API
   const extractEventDataFromEventApi = eventApi => {
-    const { id, title, start, end, url, extendedProps: { calendar, guests, location, description }, allDay } = eventApi
+    const { id, title, start, end, url, extendedProps: { description } } = eventApi
 
     return {
       id,
@@ -55,12 +55,8 @@ export const useCalendarOld = (event, isEventHandlerSidebarActive, isLeftSidebar
       end,
       url,
       extendedProps: {
-        calendar,
-        guests,
-        location,
         description,
       },
-      allDay,
     }
   }
 
@@ -148,7 +144,10 @@ export const useCalendarOld = (event, isEventHandlerSidebarActive, isLeftSidebar
 
 
   // 👉 Update event
-  const updateEvent = _event => {
+  const
+
+
+      updateEvent = _event => {
     store.updateEvent(_event)
       .then(r => {
         const propsToUpdate = ['id', 'title', 'url']

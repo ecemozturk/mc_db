@@ -16,7 +16,7 @@ const storeCalendar = async (event) => {
     return newEvent
 }
 
-const updateCalendar = async (id, event) => {
+const updateEvent = async (id, event) => {
     const response = await axios.put(`/api/events/${id}`, event)
     const updatedEvent = response.data.data
     events.value = events.value.map((e) => (e.id === id ? updatedEvent : e))
@@ -32,6 +32,6 @@ export default () => ({
     events,
     fetchEvents,
     storeCalendar,
-    updateCalendar,
+    updateEvent,
     destroyCalendar
 })
