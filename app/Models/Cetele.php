@@ -10,7 +10,7 @@ class Cetele extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'users_id',
         'gizli_numara',
         'arayan_numara',
         'arama_tarihi',
@@ -27,6 +27,8 @@ class Cetele extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'users_id');
     }
+
+
 }

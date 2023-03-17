@@ -14,8 +14,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('ceteles', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->unsignedBigInteger('users_id')->nullable();
+            $table->foreign('users_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
