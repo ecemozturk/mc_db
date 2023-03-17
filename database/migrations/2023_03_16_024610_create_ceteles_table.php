@@ -26,7 +26,7 @@ return new class extends Migration
             $table->string('ne_yapildi');
             $table->string('yonlendirilen_kurumlar');
             $table->string('mc_nereden_duydu');
-            $table->text('celete_notlari')->nullable();
+            $table->text('cetele_notlari')->nullable();
             $table->timestamps();
         });
     }

@@ -4,6 +4,10 @@ import { isUserLoggedIn } from './utils'
 import routes from '~pages'
 import { canNavigate } from '@layouts/plugins/casl'
 import EventEdit from "@/pages/EventEdit.vue";
+import CeteleList from "@/pages/Cetele/CeteleList.vue";
+import CeteleCreate from "@/pages/Cetele/CeteleCreate.vue";
+import CeteleView from "@/pages/Cetele/CeteleView.vue";
+import CeteleUpdate from "@/pages/Cetele/CeteleUpdate.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +30,30 @@ const router = createRouter({
     {
       path: '/pages/user-profile',
       redirect: () => ({ name: 'pages-user-profile-tab', params: { tab: 'profile' } }),
+    },
+
+
+    {
+      path: '/cetele/cetelelist',
+      name: 'cetelelist',
+      component: CeteleList,
+      meta: { requiresAuth: false },
+    },
+    {
+      name: 'cetele-create',
+      component: CeteleCreate,
+    },
+    {
+      path: '/cetele/cetele/:id',
+      name: 'cetele-details',
+      component: CeteleView,
+      props: true,
+    },
+    {
+      path: '/cetele/cetele/update/:id',
+      name: 'cetele-update',
+      component: CeteleUpdate,
+      props: true,
     },
     {
       path: '/events/:id/edit',
@@ -81,3 +109,8 @@ router.beforeEach(to => {
   }
 })
 export default router
+
+
+
+
+
