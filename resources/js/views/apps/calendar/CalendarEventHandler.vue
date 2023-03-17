@@ -263,6 +263,8 @@ const endDateTimePickerConfig = computed(() => {
                 <VTextarea
                   v-model="event.description"
                   label="Description"
+                  :rules="[requiredValidator]"
+
                 />
               </VCol>
 
