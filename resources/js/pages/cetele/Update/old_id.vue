@@ -1,7 +1,7 @@
 <template>
   <VRow>
     <VCol cols="12">
-      <VCard title="Create Cetele">
+      <VCard title="Update Cetele">
         <VCardText>
           <VRow>
             <!--Step1 Volunteers-->
@@ -62,13 +62,6 @@
             <!-- Step 7 Gizli Numara -->
             <VCol cols="12" md="6">
               <VCheckbox v-model="ceteleData.gizli_numara" label="Gizli Numara"/>
-            </VCol>
-            <!-- Step 8 Arayan Numara -->
-            <VCol cols="12" md="6" v-if="!ceteleData.gizli_numara">
-              <VTextField
-                v-model="ceteleData.arayan_numara"
-                label="Arayan Numarası"
-              />
             </VCol>
             <!-- Step 9 Kimin için Aradı -->
             <VCol cols="8" md="8">
@@ -139,41 +132,46 @@
               />
             </VCol>
 
+            <VTextField
+              v-model="ceteleData.arayan_numara"
+              label="Arayan Numarası"
+              ></VTextField>
+
             <!-- Step 12.1 Diğer -->
             <VCol cols="8" md="8" v-if="ceteleData.mc_nereden_duydu === 'Diğer'">
               <VTextField
                 v-model="ceteleData.mc_nereden_duydu_diger"
                 label="Diğer (Açıklama)"
-                hint="Mor Çatı'dan nasıl haberdar olduğunu açıklayınız."
-                persistent-hint
               />
             </VCol>
 
-            <!-- Step 13 Çetele Notları -->
+            <!-- Step 13 Notlar -->
             <VCol cols="8" md="8">
               <VTextarea
                 v-model="ceteleData.notlar"
-                label="Çetele Notları"
-                hint="Çetele ile ilgili ek bilgiler veya notlarınızı buraya yazabilirsiniz."
-                persistent-hint
+                label="Notlar"
+                auto-grow
+                clearable
               />
             </VCol>
 
-            <!-- Submit Button -->
+            <!-- Step 14 Submit Button -->
             <VCol cols="8" md="8">
               <VBtn
                 color="primary"
                 @click="submitCeteleForm"
               >
-                Çetele Formunu Gönder
+                Kaydet
               </VBtn>
             </VCol>
           </VRow>
-          </VCardText>
-        </VCard>
+
+
+          </VCardText></VCard>
     </VCol>
-  </VRow>
+      </VRow>
 </template>
+
 
 <script>
 import {
@@ -184,22 +182,25 @@ import {
   defineComponent,
   computed,
 } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import axios from 'axios';
 import { useKurum } from '@/composables/api/useKurum';
 import { useCities } from '@/composables/api/useCities';
 import { useCountry } from '@/composables/api/useCountry';
 import mcDateTimePicker from "@/composables/templates/mcDateTimePicker.vue";
 import dayjs from 'dayjs';
-import createCetele from '@/composables/useCetele';
+import useCetele from '@/composables/useCetele';
+
 export default defineComponent({
   components: {
     mcDateTimePicker,
   },
   setup() {
+    const route = useRoute();
+    const ceteleId = route.params.id;
     const ceteleData = reactive({
       arayan_kimin_icin: '',
-      ne_yapildi: [], // Initialize ne_yapildi as an empty array
+      ne_yapildi: [],
       yonlendirilen_kurumlar: [],
       anonim_numara: false,
       gizli_numara: false,
@@ -207,187 +208,49 @@ export default defineComponent({
       arayan_adsoyad: '',
       arayan_ulke: '',
 
-
     });
 
-
-
-    const date = ref('');
-
-    const { countries, fetchCountries } = useCountry();
-    const { cities, fetchCities } = useCities();
-
-    const isParentSelected = (parentKurum) => {
-      return ceteleData.yonlendirilen_kurumlar.includes(parentKurum.id);
-    };
-
-    const isChildSelected = (childKurum) => {
-      return ceteleData.yonlendirilen_kurumlar.includes(childKurum.id);
-    };
-
-    const volunteers = ref([]);
-    const inlineRadio = ref(null);
-    const { kurumlar, fetchKurumlar } = useKurum();
-    const errorMessages = ref([]); // Add errorMessages ref
-    const snackbarVisible = ref(false); // Add snackbarVisible ref
-
-    async function fetchVolunteers() {
-      try {
-        const response = await axios.get('/api/users');
-        console.log('Response data:', response.data);
-        volunteers.value = response.data.data.map(user => user.name);
-      } catch (error) {
-        console.error('Error fetching volunteers:', error);
-      }
-    };
-
-    function onlyNumbersAndPlus(value) {
-      const regex = /^[0-9+]+$/;
-      return regex.test(value) || 'Only numbers and "+" are allowed';
-    }
+    // ... other refs and functions from create.vue
 
     onMounted(async () => {
-      await fetchVolunteers();
-      await fetchCountries();
-      await fetchCities();
-      await fetchKurumlar();
-    });
+      const route = useRoute();
+      const id = route.params.id;
+      const fetchedData = await useCetele.getCeteleById(id);
 
-
-    //KURUM YÖNLENDİRMESİ
-// ...
-
-    function handleParentCheckboxChange(parentKurum) {
-      const parentIndex = ceteleData.yonlendirilen_kurumlar.indexOf(parentKurum.id);
-      if (parentIndex > -1) {
-        // If the parent is selected, select all child items
-        if (parentKurum.children) {
-          parentKurum.children.forEach(childKurum => {
-            if (!ceteleData.yonlendirilen_kurumlar.includes(childKurum.id)) {
-              ceteleData.yonlendirilen_kurumlar.push(childKurum.id);
-            }
-          });
-        }
-      } else {
-        // If the parent is deselected, deselect all child items
-        if (parentKurum.children) {
-          parentKurum.children.forEach(childKurum => {
-            const childIndex = ceteleData.yonlendirilen_kurumlar.indexOf(childKurum.id);
-            if (childIndex > -1) {
-              ceteleData.yonlendirilen_kurumlar.splice(childIndex, 1);
-            }
-          });
-        }
+      if (fetchedData) {
+        ceteleData.arayan_numara = fetchedData.arayan_numara;
+        ceteleData.arayan_kimin_icin = fetchedData.arayan_kimin_icin;
+        ceteleData.ne_yapildi = fetchedData.ne_yapildi;
+        ceteleData.mc_nereden_duydu = fetchedData.mc_nereden_duydu;
+        ceteleData.mc_nereden_duydu_diger = fetchedData.mc_nereden_duydu_diger;
+        ceteleData.notlar = fetchedData.notlar;
       }
-    }
-
-    function handleChildCheckboxChange(parentKurum, childKurum) {
-      const childIndex = ceteleData.yonlendirilen_kurumlar.indexOf(childKurum.id);
-      if (childIndex > -1) {
-        // If the child is selected, select the parent item
-        if (!ceteleData.yonlendirilen_kurumlar.includes(parentKurum.id)) {
-          ceteleData.yonlendirilen_kurumlar.push(parentKurum.id);
-        }
-      } else {
-        // If all child items are deselected, deselect the parent item
-        const allChildrenDeselected = parentKurum.children.every(
-          child => !ceteleData.yonlendirilen_kurumlar.includes(child.id)
-        );
-        if (allChildrenDeselected) {
-          const parentIndex = ceteleData.yonlendirilen_kurumlar.indexOf(parentKurum.id);
-          if (parentIndex > -1) {
-            ceteleData.yonlendirilen_kurumlar.splice(parentIndex, 1);
-          }
-        }
-      }
-    }
-
-    // Define your submitForm and other functions here
-    function submitForm() {
-      // Your submitForm logic
-    }
-
-    const defaultCountry = computed(() => {
-      return countries.value.find(country => country.name === 'Türkiye');
-    });
-
-    const cityRequired = (value) => {
-      if (ceteleData.arayan_ulke === "Türkiye") {
-        return !!value || "Lütfen bir şehir seçin";
-      }
-      return true;
-    };
-
-    const isTurkeySelected = computed(() => {
-      return ceteleData.arayan_ulke && ceteleData.arayan_ulke.name === 'Türkiye';
     });
 
 
     async function submitForm() {
       try {
-        await createCetele(ceteleData.value);
-        console.log('Cetele created successfully');
+        await updateCetele(ceteleId, ceteleData);
+        console.log('cetele updated successfully');
 
         // You can add your success handling logic here
       } catch (error) {
-        console.error('Error creating cetele:', error);
+        console.error('Error updating cetele:', error);
         // You can add error handling logic here
       }
     }
 
-
-    function resetForm() {
-      Object.assign(ceteleData, {
-        arayan_kimin_icin: '',
-        ne_yapildi: [],
-        yonlendirilen_kurumlar: [],
-        arama_tarihi: '',
-        anonim_numara: 'Bilinen Numara',
-        volunteers: '',
-        arayan_ulke: '',
-        arayan_adsoyad: '',
-
-      });
-    }
-
-
-
-
-    // Set the ceteleData.arayan_ulke to defaultCountry
-    watch(
-      () => defaultCountry.value,
-      (newValue) => {
-        if (newValue) {
-          ceteleData.arayan_ulke = newValue;
-        }
-      },
-      { immediate: true }
-    );
-
-
+    // ... other functions from create.vue
 
     return {
       ceteleData,
-      isTurkeySelected,
-      cityRequired,
-      submitForm,
-      resetForm,
-      errorMessages,
-      snackbarVisible,
-      volunteers,
-      countries,
-      cities,
-      onlyNumbersAndPlus,
-      inlineRadio,
-      kurumlar,
-      handleParentCheckboxChange,
-      handleChildCheckboxChange,
-      isParentSelected,
-      isChildSelected,
-
-
+      // ... other returned values from create.vue
     };
   },
 });
-
 </script>
+
+
+<style scoped>
+/* Add any additional styling here */
+</style>

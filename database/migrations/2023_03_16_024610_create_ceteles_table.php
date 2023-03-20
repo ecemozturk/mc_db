@@ -19,12 +19,12 @@ return new class extends Migration
             $table->string('arayan_numara');
             $table->dateTime('arama_tarihi');
             $table->boolean('anonim_numara');
-            $table->string('arayan_adsoyad');
+            $table->string('arayan_adsoyad')->nullable();
             $table->string('arayan_sehir');
             $table->string('arayan_ulke');
             $table->string('arayan_kimin_icin');
             $table->string('ne_yapildi');
-            $table->string('yonlendirilen_kurumlar');
+            $table->string('yonlendirilen_kurumlar')->nullable();
             $table->string('mc_nereden_duydu');
             $table->text('cetele_notlari')->nullable();
             $table->timestamps();

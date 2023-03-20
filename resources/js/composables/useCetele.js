@@ -12,8 +12,6 @@ const getCeteleList = async () => {
     }
 };
 
-
-
 const getCeteleById = async (id) => {
     try {
         const response = await axios.get(`/api/ceteles/${id}`);
@@ -25,7 +23,11 @@ const getCeteleById = async (id) => {
 
 const createCetele = async (data) => {
     try {
-        await axios.post('/api/ceteles', data);
+        await axios.post('/api/ceteles', data)
+            .then(response => {
+                console.log(response);
+                console.log("Successfully submitted");
+            });
     } catch (error) {
         console.log('Error:', error.response.data);
         return error.response.data;
@@ -53,7 +55,8 @@ export default {
     ceteleList,
     getCeteleList,
     getCeteleById,
-    createCetele,
     updateCetele,
     deleteCetele,
 };
+export { createCetele };
+

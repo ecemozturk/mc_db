@@ -21,6 +21,7 @@ declare module '@vue/runtime-core' {
     CardStatisticsVerticalSimple: typeof import('./resources/js/@core/components/CardStatisticsVerticalSimple.vue')['default']
     ConfirmDialog: typeof import('./resources/js/@core/components/ConfirmDialog.vue')['default']
     CustomizerSection: typeof import('./resources/js/@core/components/CustomizerSection.vue')['default']
+    DateTimePicker: typeof import('./resources/js/views/demos/forms/form-elements/date-time-picker/DateTimePicker.vue')['default']
     DemoAlertBasic: typeof import('./resources/js/views/demos/components/alert/DemoAlertBasic.vue')['default']
     DemoAlertBorder: typeof import('./resources/js/views/demos/components/alert/DemoAlertBorder.vue')['default']
     DemoAlertClosable: typeof import('./resources/js/views/demos/components/alert/DemoAlertClosable.vue')['default']

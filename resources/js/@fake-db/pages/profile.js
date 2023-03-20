@@ -375,7 +375,7 @@ const data = {
       startDate: '10/2/19',
       members: '137 members',
       client: 'Hulda Wright',
-      title: 'Create Website',
+      title: 'Create.vue Website',
       avatar: htmlLabel,
       description: 'Your domain name should reflect your products or services so that your...',
       avatarGroup: [
@@ -423,7 +423,7 @@ const data = {
       members: '16 members',
       client: 'Olive Strickland',
       avatar: xdLabel,
-      description: 'Premium logo designs created by top logo designers. Create the branding of business.',
+      description: 'Premium logo designs created by top logo designers. Create.vue the branding of business.',
       avatarGroup: [
         { avatar: avatar8, name: 'Kim Karlos' },
         { avatar: avatar1, name: 'Katy Turner' },
@@ -652,7 +652,7 @@ const projectTable = [
 
 mock.onGet('/pages/profile').reply(config => {
   const { tab = '' } = config.params ?? ''
-  
+
   return [200, data[tab]]
 })
 mock.onGet('/pages/profile-header').reply(() => {

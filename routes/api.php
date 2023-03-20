@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CeteleController;
 use App\Http\Controllers\Api\CountryController;
+use App\Http\Controllers\AuthController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -16,10 +18,18 @@ use App\Http\Controllers\Api\CountryController;
 |
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 */
+
+
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+
+    Route::group(['middleware' => 'auth:sanctum'], function() {
+        Route::get('logout', [AuthController::class, 'logout']);
+        Route::get('user', [AuthController::class, 'user']);
+    });
+});
 
 ////Api start
 Route::get('/cities', [\App\Http\Controllers\Api\CityController::class, 'index']);
@@ -44,7 +54,8 @@ Route::get('/ceteles/{id}', [CeteleController::class, 'show']);
 Route::put('/ceteles/{id}', [CeteleController::class, 'update']);
 Route::delete('/ceteles/{id}', [CeteleController::class, 'destroy']);
 
-Route::apiResource('users', \App\Http\Controllers\UserController::class);
 
-
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
 

@@ -17,7 +17,7 @@ const admins = [
 
 const cruds = [
   [
-    'Create',
+    'Create.vue',
     'tabler-plus',
   ],
   [

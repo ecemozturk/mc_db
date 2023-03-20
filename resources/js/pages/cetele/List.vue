@@ -7,12 +7,10 @@
         <VSelect v-model="rowsPerPage" density="compact" :items="[10, 20, 30, 50]" />
       </div>
 
-      <div class="me-3">
-        <!-- Create cetele -->
-        <VBtn prepend-icon="tabler-plus" :to="{ name: 'cetele-create' }">
-          Yeni Veri Ekle
-        </VBtn>
-      </div>
+      <VBtn prepend-icon="tabler-plus" :to="{ path: '/cetele/create' }">
+        Add new
+      </VBtn>
+
 
       <VSpacer />
 
@@ -61,7 +59,7 @@
         <!-- Id -->
         <td>{{ cetele.id }}</td>
 
-        <!-- Görüşen Gönüllü -->
+        <!-- Row for GBT --- Görüşen Gönüllü -->
         <td>{{ cetele.user ? cetele.user.name : 'Unknown' }}</td>
 
         <!-- Arama Tarihi -->
@@ -76,25 +74,19 @@
         <!-- Actions -->
         <td style="width: 8rem;">
           <!-- Add the 'to' attribute to the Edit button -->
-          <VBtn
-            icon
-            variant="text"
-            color="default"
-            size="x-small"
-            :to="{ name: 'cetele-update', params: { id: cetele.id } }"
-          >
-            <VIcon :size="22" icon="tabler-pencil" />
-          </VBtn>
 
-          <VBtn
-            icon
-            variant="text"
-            color="default"
-            size="x-small"
-            :to="{ name: 'cetele-details', params: { id: cetele.id } }"
-          >
+            <VBtn icon variant="text" color="default" size="x-small" :to="{ path: `/cetele/update/${cetele.id}` }">
+              <VIcon :size="22" icon="tabler-pencil" />
+            </VBtn>
+
+          <!--            " -->
+
+          <VBtn icon variant="text" color="default" size="x-small" :to="{ path: `/cetele/view/${cetele.id}` }">
             <VIcon :size="22" icon="tabler-eye" />
           </VBtn>
+
+          <!--           }"
+ -->
         </td>
       </tr>
       </tbody>
@@ -167,7 +159,7 @@ const name = (userId) => {
 const fetchCeteles = async () => {
   await Promise.all([useCetele.getCeteleList(), useUser.getUserList()]);
   console.log('User list:', useUser.userList.value);
-  console.log('Cetele list:', useCetele.ceteleList.value);
+  console.log('cetele list:', useCetele.ceteleList.value);
 
   if (!Array.isArray(useUser.userList.value)) {
     console.error('User list is not an array');

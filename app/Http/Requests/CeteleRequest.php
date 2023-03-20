@@ -25,7 +25,8 @@ class CeteleRequest extends FormRequest
             'ne_yapildi' => 'nullable|string',
             'yonlendirilen_kurumlar' => 'nullable|string',
             'mc_nereden_duydu' => 'nullable|string',
-            'celete_notlari' => 'nullable|string',
+            'cetele_notlari' => 'nullable|string',
+
         ];
     }
 

@@ -38,7 +38,7 @@ watchEffect(() => {
 const paginationData = computed(() => {
   const firstIndex = invoices.value.length ? (currentPage.value - 1) * rowPerPage.value + 1 : 0
   const lastIndex = invoices.value.length + (currentPage.value - 1) * rowPerPage.value
-  
+
   return `Showing ${ firstIndex } to ${ lastIndex } of ${ totalInvoices.value } entries`
 })
 
@@ -54,7 +54,7 @@ const resolveInvoiceBalanceVariant = (balance, total) => {
       status: 'Paid',
       chip: { color: 'success' },
     }
-  
+
   return {
     status: balance,
     chip: { variant: 'text' },
@@ -92,7 +92,7 @@ const resolveInvoiceStatusVariantAndIcon = status => {
       variant: 'error',
       icon: 'tabler-alert-circle',
     }
-  
+
   return {
     variant: 'secondary',
     icon: 'tabler-x',
@@ -111,7 +111,7 @@ const resolveInvoiceStatusVariantAndIcon = status => {
         class="d-flex align-center"
         style="width: 135px;"
       >
-        <span class="text-no-wrap me-3">Show:</span>
+        <span class="text-no-wrap me-3">Shows:</span>
         <VSelect
           v-model="rowPerPage"
           density="compact"
@@ -120,7 +120,7 @@ const resolveInvoiceStatusVariantAndIcon = status => {
       </div>
 
       <div class="me-3">
-        <!-- 👉 Create invoice -->
+        <!-- 👉 Create.vue invoice -->
         <VBtn
           prepend-icon="tabler-plus"
           :to="{ name: 'apps-invoice-add' }"

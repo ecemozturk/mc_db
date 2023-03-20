@@ -37,30 +37,19 @@ const errors = ref({
   password: undefined,
 })
 
+
 const register = () => {
-  axios.post('/auth/register', {
-    username: username.value,
+  axios.post('/api/auth/register',{
+    name: username.value,
     email: email.value,
     password: password.value,
-  }).then(r => {
-    const { accessToken, userData, userAbilities } = r.data
-
-    localStorage.setItem('userAbilities', JSON.stringify(userAbilities))
-    ability.update(userAbilities)
-    localStorage.setItem('userData', JSON.stringify(userData))
-    localStorage.setItem('accessToken', JSON.stringify(accessToken))
-
-    // Redirect to `to` query if exist or redirect to index route
-    router.replace(route.query.to ? String(route.query.to) : '/')
-    
-    return null
-  }).catch(e => {
-    const { errors: formErrors } = e.response.data
-
-    errors.value = formErrors
-    console.error(e.response.data)
+    c_password: password.value,
+  }).then(response => {
+    console.log('response >>>', response);
   })
 }
+
+
 
 const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
@@ -136,6 +125,8 @@ const onSubmit = () => {
                   label="Username"
                 />
               </VCol>
+
+
 
               <!-- email -->
               <VCol cols="12">

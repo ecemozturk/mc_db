@@ -624,7 +624,7 @@ const admins = [
 ]
 
 const cruds = [
-  ['Create', 'tabler-plus'],
+  ['Create.vue', 'tabler-plus'],
   ['Read', 'tabler-file'],
   ['Update', 'tabler-reload'],
   ['Delete', 'tabler-trash'],
@@ -703,7 +703,7 @@ const admins = [
 
 const cruds = [
   [
-    'Create',
+    'Create.vue',
     'tabler-plus',
   ],
   [

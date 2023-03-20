@@ -1,11 +1,24 @@
-import axios from 'axios'
+// axiosConfig.js
+import axios from 'axios';
 
-const axiosIns = axios.create({
-// You can add your headers here
-// ================================
-// baseURL: 'https://some-domain.com/api/',
-// timeout: 1000,
-// headers: {'X-Custom-Header': 'foobar'}
-})
+const instance = axios.create({
+    baseURL: 'http://localhost', // Update this with your own base URL
+});
 
-export default axiosIns
+instance.interceptors.request.use(
+    (config) => {
+        const accessToken = localStorage.getItem('accessToken');
+        const tokenType = localStorage.getItem('tokenType');
+
+        if (accessToken && tokenType) {
+            config.headers.Authorization = `${tokenType} ${accessToken}`;
+        }
+
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
+export default instance;

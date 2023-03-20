@@ -1,10 +1,20 @@
 <script setup>
-import { initialAbility } from '@/plugins/casl/ability'
-import { useAppAbility } from '@/plugins/casl/useAppAbility'
+//import { useAppAbility } from '@/plugins/casl/useAppAbility'
+//import { defaultAbility as initialAbility } from '@/plugins/casl/ability';
+
+
 
 const router = useRouter()
-const ability = useAppAbility()
-const userData = JSON.parse(localStorage.getItem('userData') || 'null')
+//const ability = useAppAbility()
+
+const safeParseJSON = (str, fallbackValue = {}) => {
+  try {
+    return JSON.parse(str);
+  } catch (error) {
+    return fallbackValue;
+  }
+};
+const userData = safeParseJSON(localStorage.getItem('userData'), {});
 
 const logout = () => {
 
@@ -16,10 +26,10 @@ const logout = () => {
   router.push('/login').then(() => {
 
     // Remove "userAbilities" from localStorage
-    localStorage.removeItem('userAbilities')
+ //   localStorage.removeItem('userAbilities')
 
     // Reset ability to initial ability
-    ability.update(initialAbility)
+   // ability.update(initialAbility)
   })
 }
 </script>

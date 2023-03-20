@@ -80,7 +80,7 @@ const target = (0, path_1.join)(__dirname, 'icons-bundle.js');
     let bundle = commonJS
         ? `const { addCollection } = require('${component}');\n\n`
         : `import { addCollection } from '${component}';\n\n`;
-    // Create directory for output if missing
+    // Create.vue directory for output if missing
     const dir = (0, path_1.dirname)(target);
     try {
         await fs_1.promises.mkdir(dir, {

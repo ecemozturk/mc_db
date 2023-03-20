@@ -31,12 +31,29 @@ class CeteleController extends Controller
      */
     public function store(CeteleRequest $request)
     {
-        $cetele = new Cetele($request->all());
+        $cetele = new Cetele();
+        $cetele->gizli_numara = $request->input('gizli_numara');
+        $cetele->arayan_numara = $request->input('arayan_numara');
+        $cetele->arama_tarihi = $request->input('arama_tarihi');
+        $cetele->anonim_numara = $request->input('anonim_numara');
+        $cetele->arayan_adsoyad = $request->input('arayan_adsoyad');
+        $cetele->arayan_sehir = $request->input('arayan_sehir');
+        $cetele->arayan_ulke = $request->input('arayan_ulke');
+        $cetele->arayan_kimin_icin = $request->input('arayan_kimin_icin');
+        $cetele->ne_yapildi = $request->input('ne_yapildi');
+        $cetele->yonlendirilen_kurumlar = $request->input('yonlendirilen_kurumlar');
+        $cetele->mc_nereden_duydu = $request->input('mc_nereden_duydu');
+        $cetele->cetele_notlari = $request->input('cetele_notlari');
+
         $cetele->user_id = Auth::id();
         $cetele->save();
 
         return new CeteleResource($cetele);
+
     }
+
+
+
 
     /**
      * Display the specified resource.

@@ -1,6 +1,6 @@
 <script setup>
 import { VForm } from 'vuetify/components'
-import { useAppAbility } from '@/plugins/casl/useAppAbility'
+import { createAbility } from '@/plugins/casl/ability';
 import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import axios from '@axios'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
@@ -22,7 +22,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const isPasswordVisible = ref(false)
 const route = useRoute()
 const router = useRouter()
-const ability = useAppAbility()
+const ability = createAbility();
 
 const errors = ref({
   email: undefined,
@@ -30,31 +30,39 @@ const errors = ref({
 })
 
 const refVForm = ref()
-const email = ref('admin@demo.com')
-const password = ref('admin')
+const email = ref('e@e.com')
+const password = ref('ecem123.')
 const rememberMe = ref(false)
 
+const selectedRole = ref('admin'); // Add a ref for the selected role
+
+
 const login = () => {
-  axios.post('/auth/login', {
+  axios.post('/api/auth/login', {
     email: email.value,
     password: password.value,
+    role: selectedRole.value, // Use the value of the selectedRole ref
   }).then(r => {
-    const { accessToken, userData, userAbilities } = r.data
+    const { accessToken, userData, userAbilities } = r.data?.data;
 
-    localStorage.setItem('userAbilities', JSON.stringify(userAbilities))
-    ability.update(userAbilities)
-    localStorage.setItem('userData', JSON.stringify(userData))
-    localStorage.setItem('accessToken', JSON.stringify(accessToken))
+    localStorage.setItem('accessToken', accessToken);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+    localStorage.setItem('userAbilities', JSON.stringify(userAbilities));
+    localStorage.setItem('userData', JSON.stringify(userData));
+    console.log('ac', accessToken)
+    console.log('userd', userdata)
+    console.log('ua', userAbilities)
 
     // Redirect to `to` query if exist or redirect to index route
-    router.replace(route.query.to ? String(route.query.to) : '/')
   }).catch(e => {
     const { errors: formErrors } = e.response.data
-
     errors.value = formErrors
     console.error(e.response.data)
   })
 }
+
+
+
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid: isValid }) => {
@@ -218,8 +226,8 @@ const onSubmit = () => {
 
 <route lang="yaml">
 meta:
-  layout: blank
-  action: read
-  subject: Auth
-  redirectIfLoggedIn: true
+layout: blank
+action: read
+subject: Auth
+redirectIfLoggedIn: true
 </route>
