@@ -36,6 +36,8 @@ Route::post('/verify-two-factor', [AuthController::class, 'verifyTwoFactor']);
 //QR
 Route::middleware([\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, \Illuminate\Routing\Middleware\SubstituteBindings::class])
     ->post('/generateQRCode', [\App\Http\Controllers\AuthController::class, 'generateQRCode']);
+//Enable 2FA
+Route::post('/enable2FA', 'TwoFactorAuthController@enableTwoFactorAuthentication');
 
 
 
