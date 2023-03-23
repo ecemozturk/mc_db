@@ -12,7 +12,7 @@ const accountData = {
   state: 'New York',
   zip: '10001',
   country: 'USA',
-  language: 'Ecem',
+  language: 'English',
   timezone: '(GMT-11:00) International Date Line West',
   currency: 'USD',
 }
@@ -107,9 +107,15 @@ const currencies = [
     <VCol cols="12">
       <VCard title="Profile Details">
         <VCardText class="d-flex">
+          <!-- 👉 Avatar -->
+          <VAvatar
+            rounded
+            size="100"
+            class="me-6"
+            :image="accountDataLocal.avatarImg"
+          />
+
           <!-- 👉 Upload Photo -->
-         <!--
-          TODO Add File Area
           <form
             ref="refForm"
             class="d-flex flex-column justify-center gap-4"
@@ -152,7 +158,7 @@ const currencies = [
             <p class="text-body-1 mb-0">
               Allowed JPG, GIF or PNG. Max size of 800K
             </p>
-          </form> -->
+          </form>
         </VCardText>
 
         <VDivider />
@@ -161,17 +167,6 @@ const currencies = [
           <!-- 👉 Form -->
           <VForm class="mt-6">
             <VRow>
-              <!-- 👉 Görüşen Gönüllü -->
-              <VCol
-                cols="12"
-                md="6"
-              >
-                <VSelect
-                  v-model="accountDataLocal.language"
-                  label="Görüşen Gönüllü"
-                  :items="['Açelya', 'Saida', 'Ecem', 'Sedef', 'Aliş']"
-                />
-              </VCol>
               <!-- 👉 First Name -->
               <VCol
                 md="6"
@@ -273,7 +268,17 @@ const currencies = [
                 />
               </VCol>
 
-
+              <!-- 👉 Language -->
+              <VCol
+                cols="12"
+                md="6"
+              >
+                <VSelect
+                  v-model="accountDataLocal.language"
+                  label="Language"
+                  :items="['English', 'Spanish', 'Arabic', 'Hindi', 'Urdu']"
+                />
+              </VCol>
 
               <!-- 👉 Timezone -->
               <VCol

@@ -1,23 +1,44 @@
-import { computed } from 'vue'
-import { useAbility } from '@casl/vue'
-import {createAbility} from "@/plugins/casl/createAbility";
+// ability.js
+import { defineAbility, Ability } from '@casl/ability';
 
-
-const ability = createAbility();
-
-
-export function useAppAbility() {
-    const ability = useAbility()
-
-    const can = (action, subject) => {
-        return computed(() => ability.can(action, subject))
-    }
-
-    return {
-        can,
-    }
+function subjectName(subject) {
+  if (!subject || typeof subject === 'string') {
+    return subject;
+  }
+  return subject.__type;
 }
 
-export { ability }
+const initialAbility = new Ability([], { subjectName });
 
-export { createAbility }; // Export createAbility
+const guestAbility = defineAbility((can, cannot) => {
+  // Define abilities for guest users
+  can('read', 'Auth');
+});
+
+const adminAbility = defineAbility((can, cannot) => {
+  // Define abilities for admin users
+  can('manage', 'all');
+});
+
+// ... other code
+
+
+export const checkPermission = (action, subject) => {
+  const ability = localStorage.getItem('userAbilities')
+      ? new Ability(JSON.parse(localStorage.getItem('userAbilities')))
+      : guestAbility
+
+  return ability.can(action, subject)
+}
+
+const can = (action, subject) => {
+  const ability = localStorage.getItem('userAbilities')
+      ? new Ability(JSON.parse(localStorage.getItem('userAbilities')), { subjectName })
+      : guestAbility
+
+  return ability.can(action, subject)
+}
+
+
+export { adminAbility, guestAbility, initialAbility, can }
+

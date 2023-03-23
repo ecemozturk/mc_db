@@ -224,7 +224,7 @@ const isOneTimePasswordDialogVisible = ref(false)
     <!-- !SECTION -->
 
     <VCol cols="12">
-      <!-- SECTION: Create.vue an API key -->
+      <!-- SECTION: Create an API key -->
       <VCard title="Create an API key">
         <VRow no-gutters>
           <!-- 👉 Choose API Key -->
@@ -250,7 +250,7 @@ const isOneTimePasswordDialogVisible = ref(false)
                     <VTextField label="Name the API key" />
                   </VCol>
 
-                  <!-- 👉 Create.vue Key Button -->
+                  <!-- 👉 Create Key Button -->
                   <VCol cols="12">
                     <VBtn
                       type="submit"

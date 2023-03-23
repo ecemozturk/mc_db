@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\CeteleController;
 use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\AuthController;
 
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,26 +15,34 @@ use App\Http\Controllers\AuthController;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-
-
 */
 
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
-Route::group(['prefix' => 'auth'], function () {
-    Route::post('login', [AuthController::class, 'login']);
-    Route::post('register', [AuthController::class, 'register']);
-
-    Route::group(['middleware' => 'auth:sanctum'], function() {
-        Route::get('logout', [AuthController::class, 'logout']);
-        Route::get('user', [AuthController::class, 'user']);
-    });
+Route::middleware('auth:api')->group(function () {
+    Route::get('/user', [AuthController::class, 'getUserData']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+//Change password
+Route::post('/change-password', [AuthController::class, 'changePassword']);
+
+//Two factor
+Route::post('/enable-two-factor', [AuthController::class, 'enableTwoFactor']);
+Route::post('/disable-two-factor', [AuthController::class, 'disableTwoFactor']);
+Route::post('/verify-two-factor', [AuthController::class, 'verifyTwoFactor']);
+
+//QR
+Route::middleware([\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, \Illuminate\Routing\Middleware\SubstituteBindings::class])
+    ->post('/generateQRCode', [\App\Http\Controllers\AuthController::class, 'generateQRCode']);
+
+
 
 ////Api start
 Route::get('/cities', [\App\Http\Controllers\Api\CityController::class, 'index']);
 Route::get('/kurumlar', [\App\Http\Controllers\Api\KurumController::class, 'index']);
 Route::apiResource('countries', CountryController::class)->only(['index']);
-
 ////Api end
 
 
@@ -53,9 +60,4 @@ Route::post('/ceteles', [CeteleController::class, 'store']);
 Route::get('/ceteles/{id}', [CeteleController::class, 'show']);
 Route::put('/ceteles/{id}', [CeteleController::class, 'update']);
 Route::delete('/ceteles/{id}', [CeteleController::class, 'destroy']);
-
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
