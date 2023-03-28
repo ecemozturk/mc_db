@@ -4,6 +4,7 @@
       <VCard title="Create Cetele">
         <VCardText>
           <VRow>
+
             <!--Step1 Volunteers-->
             <VCol cols="8" md="8">
               <VSelect
@@ -14,6 +15,7 @@
                 density="compact"
               />
             </VCol>
+            <!--TODO Add dark theme for mcDataTimePicker-->
             <!-- Step 2 Arama Tarihi-->
             <VCol cols="12" md="6">
               <mcDateTimePicker
@@ -94,7 +96,7 @@
               <VCheckbox
                 v-model="ceteleData.ne_yapildi"
                 label="Kurum yönlendirilmesi yapıldı"
-                value="kurum_yonlendirilmesi"
+                value="yonlendirilen_kurumlar"
               />
               <VCheckbox
                 v-model="ceteleData.ne_yapildi"
@@ -109,11 +111,13 @@
             </VCol>
             <!-- Step 11 Yönlendirilen Kurumlar -->
             <!-- Step 11 Yönlendirilen Kurumlar -->
-            <VCol cols="8" md="8" v-if="ceteleData.ne_yapildi.includes('kurum_yonlendirilmesi')">
+            <!--TODO Yönlendilrilen Kurumlar not saved in database-->
+            <VCol cols="8" md="8" v-if="ceteleData.ne_yapildi.includes('yonlendirilen_kurumlar')">
               <v-label>Yönlendirilen Kurumlar</v-label>
               <div v-for="parentKurum in kurumlar" :key="parentKurum.id">
                 <VCheckbox
                   :input-value="isParentSelected(parentKurum)"
+
                   :label="parentKurum.name"
 
                   @change="handleParentCheckboxChange(parentKurum)"
@@ -122,6 +126,7 @@
                   <VCheckbox
                     :input-value="isChildSelected(childKurum)"
                     :label="childKurum.name"
+
                     @change="handleChildCheckboxChange(parentKurum, childKurum)"
                   />
                 </div>
@@ -131,7 +136,7 @@
 
             <!-- Step 12 Mor Çatı'dan Nasıl Haberdar Oldu? -->
 
-
+<!-- TODO: Add options textarea for diğer seçenek -->
 
             <VCol cols="8" md="8">
               <VSelect
@@ -161,7 +166,7 @@
             <!-- Step 13 Çetele Notları -->
             <VCol cols="8" md="8">
               <VTextarea
-                v-model="ceteleData.notlar"
+                v-model="ceteleData.cetele_notlari"
                 label="Çetele Notları"
                 hint="Çetele ile ilgili ek bilgiler veya notlarınızı buraya yazabilirsiniz."
                 persistent-hint
@@ -219,12 +224,13 @@ const ceteleData = reactive({
   arama_tarihi: dayjs().format('DD.MM.YYYY HH:mm:ss'),
   arayan_adsoyad: '',
   arayan_ulke: '',
+  id: '',
 });
 
 const date = ref('');
 const { countries, fetchCountries } = useCountry();
 const { cities, fetchCities } = useCities();
-const router = useRouter();
+const router = useRouter()
 
 const isParentSelected = (parentKurum) => {
   return ceteleData.yonlendirilen_kurumlar.includes(parentKurum.id);
@@ -246,7 +252,6 @@ async function fetchVolunteers() {
     const response = await axios.get('/api/users');
     console.log('Response data:', response.data);
     users_id.value = response.data.data.map(user => user.id);
-
   } catch (error) {
     console.error('Error fetching volunteers:', error);
   }
@@ -331,7 +336,6 @@ const isTurkeySelected = computed(() => {
 
 
 async function submitForm() {
-  const router = useRouter();
 
   try {
     const dataToSend = { ...ceteleData };
@@ -355,18 +359,23 @@ async function submitForm() {
       dataToSend.arama_tarihi = aramaTarihi.format('YYYY-MM-DD HH:mm:ss');
     }
 
-    // Instead of just logging the success, store the response
-    const response = await createCeteleComposable(dataToSend);
+  //  const ecem = await createCeteleComposable(dataToSend);
+
+
+   // const createdCeteleId = ecem.data.id;
+   router.push(`/cetele/list`);
+
 
     Swal.fire({
       icon: 'success',
       title: 'Kaydedildi!',
       text: 'Çetele formu kaydedildi. Formu görüntüleyin.',
       confirmButtonText: 'OK'
-    }).then(() => {
+    })
       // After the user clicks 'OK' on the Swal dialog, redirect to the single form view
-      router.push({ path: `/cetele/view/${response.data.id}` });
-    });
+
+
+
 
     // You can add your success handling logic here
   } catch (error) {
