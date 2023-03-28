@@ -135,7 +135,7 @@
             <VTextField
               v-model="ceteleData.arayan_numara"
               label="Arayan Numarası"
-              ></VTextField>
+            ></VTextField>
 
             <!-- Step 12.1 Diğer -->
             <VCol cols="8" md="8" v-if="ceteleData.mc_nereden_duydu === 'Diğer'">
@@ -167,9 +167,9 @@
           </VRow>
 
 
-          </VCardText></VCard>
+        </VCardText></VCard>
     </VCol>
-      </VRow>
+  </VRow>
 </template>
 
 <script>
@@ -185,7 +185,6 @@ import useCetele from '@/composables/useCetele';
 import {useRoute} from "vue-router";
 import useUser from "@/composables/useUser";
 
-const route = useRoute();
 
 const name = (userId) => {
   if (!Array.isArray(useUser.userList.value)) {
@@ -201,6 +200,11 @@ export default defineComponent({
     mcDateTimePicker,
   },
   setup() {
+    const route = useRoute();
+
+    const ceteleId = route.params.id;
+
+
     const ceteleData = reactive({
       arayan_kimin_icin: '',
       ne_yapildi: [], // Initialize ne_yapildi as an empty array
@@ -215,6 +219,7 @@ export default defineComponent({
     });
 
 
+    const cetele = ref({});
 
     const date = ref('');
 
@@ -256,10 +261,6 @@ export default defineComponent({
       await fetchCities();
       await fetchKurumlar();
     });
-
-
-    //KURUM YÖNLENDİRMESİ
-// ...
 
     function handleParentCheckboxChange(parentKurum) {
       const parentIndex = ceteleData.yonlendirilen_kurumlar.indexOf(parentKurum.id);
